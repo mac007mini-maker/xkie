@@ -9,26 +9,86 @@ router.post('/nano-banana/generate', async (req, res) => {
     
     console.log('🎨 Generating image with Nano Banana...');
     
-    const result = await kieClient.createTaskWithPolling('google/nano-banana', {
+    // Use callback URL for reliable results
+    const callbackUrl = 'https://xkie.vercel.app/api/callback';
+    
+    const result = await kieClient.createTask('google/nano-banana', {
       prompt,
       output_format,
       image_size
-    });
+    }, callbackUrl);
 
     if (result.success) {
-      const imageUrl = result.data.resultUrls?.[0] || result.data.url;
+      const taskId = result.data.data?.taskId;
       
+      if (taskId) {
+        // Wait a bit for callback, then check results
+        setTimeout(async () => {
+          for (let i = 0; i < 20; i++) { // Wait up to 60 seconds
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            
+            global.taskResults = global.taskResults || {};
+            if (global.taskResults[taskId]) {
+              const taskResult = global.taskResults[taskId];
+              console.log(`✅ Got result for task ${taskId}:`, taskResult);
+              break;
+            }
+          }
+        }, 1000);
+        
+        // Return task info immediately
+        res.json({
+          success: true,
+          data: {
+            type: 'image',
+            taskId: taskId,
+            status: 'processing',
+            message: 'Image generation in progress. Check back in a few seconds.',
+            metadata: result.data
+          }
+        });
+      } else {
+        res.json({
+          success: false,
+          error: 'No taskId returned'
+        });
+      }
+    } else {
+      res.json(result);
+    }
+  } catch (error) {
+    res.json({
+      success: false,
+      error: error.message,
+      stackTrace: error.stack
+    });
+  }
+});
+
+// Get task result
+router.get('/nano-banana/result/:taskId', (req, res) => {
+  try {
+    const taskId = req.params.taskId;
+    global.taskResults = global.taskResults || {};
+    
+    const result = global.taskResults[taskId];
+    if (result) {
+      const imageUrl = result.resultUrls?.[0];
       res.json({
         success: true,
         data: {
           type: 'image',
           url: imageUrl,
-          taskId: result.data.taskId,
-          metadata: result.data.metadata
+          taskId: taskId,
+          metadata: result.metadata
         }
       });
     } else {
-      res.json(result);
+      res.json({
+        success: false,
+        error: 'Task not completed yet',
+        taskId: taskId
+      });
     }
   } catch (error) {
     res.json({

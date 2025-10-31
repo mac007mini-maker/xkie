@@ -23,6 +23,25 @@ const photoRoutes = require('./api/photo');
 const uploadRoutes = require('./api/upload');
 const commonRoutes = require('./api/common');
 
+// Callback endpoint for Kie.ai
+app.post('/api/callback', (req, res) => {
+  console.log('📥 Received callback from Kie.ai:', JSON.stringify(req.body, null, 2));
+  
+  // Store result in memory (simple solution for testing)
+  const taskId = req.body.data?.taskId;
+  if (taskId && req.body.data?.resultJson) {
+    const resultJson = JSON.parse(req.body.data.resultJson);
+    global.taskResults = global.taskResults || {};
+    global.taskResults[taskId] = {
+      success: req.body.data.state === 'success',
+      resultUrls: resultJson.resultUrls || [],
+      metadata: req.body.data
+    };
+  }
+  
+  res.json({ received: true });
+});
+
 // Use routes
 app.use('/api/video', videoRoutes);
 app.use('/api/audio', audioRoutes);
