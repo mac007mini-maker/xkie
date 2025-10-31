@@ -7,7 +7,7 @@ router.post('/nano-banana/generate', async (req, res) => {
   try {
     const { prompt, output_format = 'png', image_size = '1:1' } = req.body;
     
-    const result = await kieClient.post('/v1/image/nano-banana/generate', {
+    const result = await kieClient.createTask('google/nano-banana', {
       prompt,
       output_format,
       image_size
@@ -18,7 +18,8 @@ router.post('/nano-banana/generate', async (req, res) => {
         success: true,
         data: {
           type: 'image',
-          url: result.data.image_url || result.data.url,
+          url: result.data.image_url || result.data.url || result.data.result,
+          taskId: result.data.taskId || result.data.id,
           metadata: result.data
         }
       });
@@ -39,7 +40,7 @@ router.post('/nano-banana/edit', async (req, res) => {
   try {
     const { prompt, image_url, output_format = 'png' } = req.body;
     
-    const result = await kieClient.post('/v1/image/nano-banana/edit', {
+    const result = await kieClient.createTask('google/nano-banana-edit', {
       prompt,
       image_urls: [image_url],
       output_format
@@ -50,7 +51,8 @@ router.post('/nano-banana/edit', async (req, res) => {
         success: true,
         data: {
           type: 'image',
-          url: result.data.image_url || result.data.url,
+          url: result.data.image_url || result.data.url || result.data.result,
+          taskId: result.data.taskId || result.data.id,
           metadata: result.data
         }
       });
@@ -71,7 +73,7 @@ router.post('/4o-image/generate', async (req, res) => {
   try {
     const { prompt, image_size = '1:1' } = req.body;
     
-    const result = await kieClient.post('/v1/image/4o/generate', {
+    const result = await kieClient.createTask('openai/4o-image', {
       prompt,
       image_size
     });
@@ -81,7 +83,8 @@ router.post('/4o-image/generate', async (req, res) => {
         success: true,
         data: {
           type: 'image',
-          url: result.data.image_url || result.data.url,
+          url: result.data.image_url || result.data.url || result.data.result,
+          taskId: result.data.taskId || result.data.id,
           metadata: result.data
         }
       });
@@ -102,7 +105,7 @@ router.post('/4o-image/edit', async (req, res) => {
   try {
     const { prompt, image_url } = req.body;
     
-    const result = await kieClient.post('/v1/image/4o/edit', {
+    const result = await kieClient.createTask('openai/4o-image-edit', {
       prompt,
       image_url
     });
@@ -112,7 +115,8 @@ router.post('/4o-image/edit', async (req, res) => {
         success: true,
         data: {
           type: 'image',
-          url: result.data.image_url || result.data.url,
+          url: result.data.image_url || result.data.url || result.data.result,
+          taskId: result.data.taskId || result.data.id,
           metadata: result.data
         }
       });
@@ -133,7 +137,7 @@ router.post('/flux-kontext/generate', async (req, res) => {
   try {
     const { prompt, image_size = '1:1' } = req.body;
     
-    const result = await kieClient.post('/v1/image/flux-kontext/generate', {
+    const result = await kieClient.createTask('flux/kontext', {
       prompt,
       image_size
     });
@@ -143,7 +147,8 @@ router.post('/flux-kontext/generate', async (req, res) => {
         success: true,
         data: {
           type: 'image',
-          url: result.data.image_url || result.data.url,
+          url: result.data.image_url || result.data.url || result.data.result,
+          taskId: result.data.taskId || result.data.id,
           metadata: result.data
         }
       });
@@ -164,7 +169,7 @@ router.post('/flux-kontext/edit', async (req, res) => {
   try {
     const { prompt, image_url } = req.body;
     
-    const result = await kieClient.post('/v1/image/flux-kontext/edit', {
+    const result = await kieClient.createTask('flux/kontext-edit', {
       prompt,
       image_url
     });
@@ -174,7 +179,8 @@ router.post('/flux-kontext/edit', async (req, res) => {
         success: true,
         data: {
           type: 'image',
-          url: result.data.image_url || result.data.url,
+          url: result.data.image_url || result.data.url || result.data.result,
+          taskId: result.data.taskId || result.data.id,
           metadata: result.data
         }
       });
@@ -195,7 +201,7 @@ router.post('/ideogram/v3', async (req, res) => {
   try {
     const { prompt, style = 'auto' } = req.body;
     
-    const result = await kieClient.post('/v1/image/ideogram/v3', {
+    const result = await kieClient.createTask('ideogram/v3', {
       prompt,
       style
     });
@@ -205,7 +211,8 @@ router.post('/ideogram/v3', async (req, res) => {
         success: true,
         data: {
           type: 'image',
-          url: result.data.image_url || result.data.url,
+          url: result.data.image_url || result.data.url || result.data.result,
+          taskId: result.data.taskId || result.data.id,
           metadata: result.data
         }
       });
@@ -226,7 +233,7 @@ router.post('/ideogram/character', async (req, res) => {
   try {
     const { prompt, style = 'cartoon' } = req.body;
     
-    const result = await kieClient.post('/v1/image/ideogram/character', {
+    const result = await kieClient.createTask('ideogram/character', {
       prompt,
       style
     });
@@ -236,7 +243,8 @@ router.post('/ideogram/character', async (req, res) => {
         success: true,
         data: {
           type: 'image',
-          url: result.data.image_url || result.data.url,
+          url: result.data.image_url || result.data.url || result.data.result,
+          taskId: result.data.taskId || result.data.id,
           metadata: result.data
         }
       });
@@ -257,7 +265,7 @@ router.post('/qwen/edit', async (req, res) => {
   try {
     const { prompt, image_url } = req.body;
     
-    const result = await kieClient.post('/v1/image/qwen/edit', {
+    const result = await kieClient.createTask('qwen/image-edit', {
       prompt,
       image_url
     });
@@ -267,7 +275,8 @@ router.post('/qwen/edit', async (req, res) => {
         success: true,
         data: {
           type: 'image',
-          url: result.data.image_url || result.data.url,
+          url: result.data.image_url || result.data.url || result.data.result,
+          taskId: result.data.taskId || result.data.id,
           metadata: result.data
         }
       });
@@ -284,4 +293,3 @@ router.post('/qwen/edit', async (req, res) => {
 });
 
 module.exports = router;
-
