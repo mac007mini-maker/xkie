@@ -7,20 +7,24 @@ router.post('/nano-banana/generate', async (req, res) => {
   try {
     const { prompt, output_format = 'png', image_size = '1:1' } = req.body;
     
-    const result = await kieClient.createTask('google/nano-banana', {
+    console.log('🎨 Generating image with Nano Banana...');
+    
+    const result = await kieClient.createTaskWithPolling('google/nano-banana', {
       prompt,
       output_format,
       image_size
     });
 
     if (result.success) {
+      const imageUrl = result.data.resultUrls?.[0] || result.data.url;
+      
       res.json({
         success: true,
         data: {
           type: 'image',
-          url: result.data.image_url || result.data.url || result.data.result,
-          taskId: result.data.taskId || result.data.id,
-          metadata: result.data
+          url: imageUrl,
+          taskId: result.data.taskId,
+          metadata: result.data.metadata
         }
       });
     } else {
